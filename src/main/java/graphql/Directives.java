@@ -57,4 +57,14 @@ public class Directives {
             .validLocations(FIELD)
             .build();
 
+    public static final GraphQLDirective ExportDirective = GraphQLDirective.newDirective()
+            .name("export")
+            .description("This directive allows variables to be assigned dynamically to field values")
+            .argument(newArgument()
+                    .name("as")
+                    .type(nonNull(GraphQLString))
+                    .description("The name of the variable to assign to the field value"))
+            .validLocations(FIELD)
+            .build();
+
 }

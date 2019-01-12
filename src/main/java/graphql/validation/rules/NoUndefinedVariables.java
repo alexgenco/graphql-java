@@ -1,16 +1,15 @@
 package graphql.validation.rules;
 
 
-import graphql.language.FragmentDefinition;
-import graphql.language.OperationDefinition;
-import graphql.language.VariableDefinition;
-import graphql.language.VariableReference;
+import graphql.Directives;
+import graphql.language.*;
 import graphql.validation.AbstractRule;
 import graphql.validation.ValidationContext;
 import graphql.validation.ValidationErrorCollector;
 import graphql.validation.ValidationErrorType;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 public class NoUndefinedVariables extends AbstractRule {
@@ -43,5 +42,13 @@ public class NoUndefinedVariables extends AbstractRule {
     @Override
     public void checkVariableDefinition(VariableDefinition variableDefinition) {
         variableNames.add(variableDefinition.getName());
+    }
+
+    @Override
+    public void checkDirective(Directive directive, List<Node> ancestors) {
+        if (directive.getName().equals(Directives.ExportDirective.getName())) {
+            StringValue variableName = (StringValue) directive.getArgument("as").getValue();
+            variableNames.add(variableName.getValue());
+        }
     }
 }
