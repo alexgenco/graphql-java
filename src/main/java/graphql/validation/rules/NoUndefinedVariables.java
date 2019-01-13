@@ -10,6 +10,7 @@ import graphql.validation.ValidationErrorType;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class NoUndefinedVariables extends AbstractRule {
@@ -47,7 +48,17 @@ public class NoUndefinedVariables extends AbstractRule {
     @Override
     public void checkDirective(Directive directive, List<Node> ancestors) {
         if (directive.getName().equals(Directives.ExportDirective.getName())) {
-            StringValue variableName = (StringValue) directive.getArgument("as").getValue();
+            Map<String, Argument> argumentsByName = directive.getArgumentsByName();
+            StringValue variableName;
+
+            if (argumentsByName.containsKey("as")) {
+                variableName = (StringValue) directive.getArgument("as").getValue();
+            } else if (argumentsByName.containsKey("into")) {
+                variableName = (StringValue) directive.getArgument("into").getValue();
+            } else {
+                return;
+            }
+
             variableNames.add(variableName.getValue());
         }
     }

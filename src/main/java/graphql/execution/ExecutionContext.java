@@ -13,9 +13,7 @@ import graphql.language.OperationDefinition;
 import graphql.schema.GraphQLSchema;
 import org.dataloader.DataLoaderRegistry;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
@@ -147,6 +145,22 @@ public class ExecutionContext {
 
     public void putVariable(String key, Object value) {
         this.variables.put(key, value);
+    }
+
+    public void addToListVariable(String key, Object value) {
+        Object currentValue = variables.get(key);
+
+        if (currentValue == null) {
+            ArrayList<Object> newValue = new ArrayList<>();
+            newValue.add(value);
+
+            this.variables.put(key, newValue);
+        } else {
+            // TODO: handle cast error
+            ArrayList<Object> newValue = new ArrayList<>((List<Object>) currentValue);
+            newValue.add(value);
+            this.variables.put(key, newValue);
+        }
     }
 
     /**

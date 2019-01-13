@@ -62,8 +62,12 @@ public class Directives {
             .description("This directive allows variables to be assigned dynamically to field values")
             .argument(newArgument()
                     .name("as")
-                    .type(nonNull(GraphQLString))
+                    .type(GraphQLString)
                     .description("The name of the variable to assign to the field value"))
+            .argument(newArgument()
+                    .name("into")
+                    .type(GraphQLString)
+                    .description("The name of the list variable to push field values into"))
             .validLocations(FIELD)
             .build();
 

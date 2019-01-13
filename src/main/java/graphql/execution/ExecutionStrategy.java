@@ -375,8 +375,16 @@ public abstract class ExecutionStrategy {
 
         if (exportDirective != null) {
             executionResultFuture = executionResultFuture.thenApply(executionResult -> {
-                StringValue variableName = (StringValue) exportDirective.getArgument("as").getValue();
-                executionContext.putVariable(variableName.getValue(), executionResult.getData());
+                Argument asArg = exportDirective.getArgument("as");
+                Argument intoArg = exportDirective.getArgument("into");
+                Object result = executionResult.getData();
+
+                if (asArg != null) {
+                    executionContext.putVariable(((StringValue) asArg.getValue()).getValue(), result);
+                } else if (intoArg != null) {
+                    executionContext.addToListVariable(((StringValue) intoArg.getValue()).getValue(), result);
+                }
+
                 return executionResult;
             });
         }
