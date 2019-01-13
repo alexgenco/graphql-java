@@ -145,6 +145,10 @@ public class ExecutionContext {
         this.errors.add(error);
     }
 
+    public void putVariable(String key, Object value) {
+        this.variables.put(key, value);
+    }
+
     /**
      * @return the total list of errors for this execution context
      */

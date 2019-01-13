@@ -1,14 +1,6 @@
 package graphql.execution;
 
-import graphql.ExecutionResult;
-import graphql.ExecutionResultImpl;
-import graphql.GraphQLError;
-import graphql.Internal;
-import graphql.PublicSpi;
-import graphql.SerializationError;
-import graphql.TrivialDataFetcher;
-import graphql.TypeMismatchError;
-import graphql.UnresolvedTypeError;
+import graphql.*;
 import graphql.execution.instrumentation.Instrumentation;
 import graphql.execution.instrumentation.InstrumentationContext;
 import graphql.execution.instrumentation.parameters.InstrumentationFieldCompleteParameters;
@@ -16,7 +8,9 @@ import graphql.execution.instrumentation.parameters.InstrumentationFieldFetchPar
 import graphql.execution.instrumentation.parameters.InstrumentationFieldParameters;
 import graphql.introspection.Introspection;
 import graphql.language.Argument;
+import graphql.language.Directive;
 import graphql.language.Field;
+import graphql.language.StringValue;
 import graphql.schema.CoercingSerializeException;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
@@ -376,8 +370,17 @@ public abstract class ExecutionStrategy {
         log.debug("'{}' completing field '{}'...", executionContext.getExecutionId(), executionStepInfo.getPath());
 
         FieldValueInfo fieldValueInfo = completeValue(executionContext, newParameters);
-
         CompletableFuture<ExecutionResult> executionResultFuture = fieldValueInfo.getFieldValue();
+        Directive exportDirective = field.getDirective(Directives.ExportDirective.getName());
+
+        if (exportDirective != null) {
+            executionResultFuture = executionResultFuture.thenApply(executionResult -> {
+                StringValue variableName = (StringValue) exportDirective.getArgument("as").getValue();
+                executionContext.putVariable(variableName.getValue(), executionResult.getData());
+                return executionResult;
+            });
+        }
+
         ctxCompleteField.onDispatched(executionResultFuture);
         executionResultFuture.whenComplete(ctxCompleteField::onCompleted);
         return fieldValueInfo;
